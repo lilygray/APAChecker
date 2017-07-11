@@ -4,6 +4,10 @@
 //open FSharp.Data
 //open Microsoft.Net.Http
 open System.Net.Http
+open System.Xml.Serialization
+open System.Xml
+open System.Xml.Linq
+open System.Xml.XPath
 
 [<EntryPoint>]
 
@@ -64,10 +68,28 @@ let main argv =
     // Actually invoke the request to the server
 
     // equivalent to (action="{url}" method="post")
-    let result = client.PostAsync(url, formData).Result
-    let xml = result.Content.ReadAsStringAsync().Result;
-   
+    //let result = client.PostAsync(url, formData).Result
+    //let xml = result.Content.ReadAsStringAsync().Result;
 
-    System.IO.File.WriteAllText("text.xml", xml)
-    printfn "%A" argv
+    //System.IO.File.WriteAllText("text.xml", xml)
+    //printfn "%A" argv
+   
+    let xn s = XName.Get(s,"http://www.tei-c.org/ns/1.0")
+    let doc = XDocument.Load("text.xml")
+
+    //let abstractElement = doc.XPathSelectElement("/TEI")
+    let abstractElement = doc.Element(xn "TEI").Element(xn "teiHeader").Element(xn "profileDesc").Element(xn "abstract").Element(xn "p").Value
+    let titleElement = doc.Element(xn "TEI").Element(xn "teiHeader").Element(xn "fileDesc").Element(xn "titleStmt").Element(xn "title").Value
+    let absWords = 
+        abstractElement.Split([|' '|]) 
+        |> Array.map (fun s -> s.Trim())
+
+    let absWordLength = absWords.Length
+    if absWords.Length > 250 then printfn "Most journals have a word limit between 150 and 250. Your abstract is too long at %i words." absWords.Length
+    if (150 < absWords.Length && absWords.Length < 250) then printfn "Most journals have a word limit between 150 and 250. Your abstract may be too long at %i words. Check with your particular journal." absWords.Length
+    if abstractElement.Contains(titleElement) then printfn "You have a limited number of words. Don't waste them by repeating your title!"
+
+    //printfn "%s" "hi" //(par.Attribute(XName.Get "p").Value) 
+
+    //
     0 // return an integer exit codeFSharp.Data
