@@ -8,6 +8,7 @@ open System.Xml.Serialization
 open System.Xml
 open System.Xml.Linq
 open System.Xml.XPath
+open Stanford.NLP.FSharp
 
 [<EntryPoint>]
 
@@ -74,7 +75,7 @@ let main argv =
     //System.IO.File.WriteAllText("text.xml", xml)
     //printfn "%A" argv
    
-    let xn s = XName.Get(s,"http://www.tei-c.org/ns/1.0")
+    let xn s = XName.Get(s, "http://www.tei-c.org/ns/1.0")
     let doc = XDocument.Load("text.xml")
 
     //let abstractElement = doc.XPathSelectElement("/TEI")
@@ -89,7 +90,16 @@ let main argv =
     if (150 < absWords.Length && absWords.Length < 250) then printfn "Most journals have a word limit between 150 and 250. Your abstract may be too long at %i words. Check with your particular journal." absWords.Length
     if abstractElement.Contains(titleElement) then printfn "You have a limited number of words. Don't waste them by repeating your title!"
 
-    //printfn "%s" "hi" //(par.Attribute(XName.Get "p").Value) 
+    //printfn "%s" "hi" //(par.Attribute(XName.Get "p").Value)
 
-    //
+    for div in doc.Element(xn "TEI").Element(xn "text").Element(xn "body").Elements(xn "div") do
+        for parg in div.Elements(xn "p") do
+            printfn "%s" (parg.Value)
+
+    for div in doc.Element(xn "TEI").Element(xn "text").Element(xn "body").Elements(xn "div") do
+        for parg in div.Elements(xn "p") do
+            for rf in parg.Elements(xn "ref") do
+               // if rf.Attribute(xn "type").Value = "bibr" then //no errors? but it's throwing a NullReferenceException
+                if (rf.Value.Contains("and") || rf.Value.Contains("&")) then printfn "%s" (rf.Value)
+
     0 // return an integer exit codeFSharp.Data

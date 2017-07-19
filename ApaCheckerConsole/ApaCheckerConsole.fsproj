@@ -144,6 +144,18 @@
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="ejml-0.23">
+      <HintPath>..\packages\Stanford.NLP.Parser.3.7.0.0\lib\ejml-0.23.dll</HintPath>
+    </Reference>
+    <Reference Include="slf4j-api">
+      <HintPath>..\packages\Stanford.NLP.Parser.3.7.0.0\lib\slf4j-api.dll</HintPath>
+    </Reference>
+    <Reference Include="stanford-parser">
+      <HintPath>..\packages\Stanford.NLP.Parser.3.7.0.0\lib\stanford-parser.dll</HintPath>
+    </Reference>
+    <Reference Include="Stanford.NLP.Parser.Fsharp">
+      <HintPath>..\packages\Stanford.NLP.Parser.Fsharp.0.0.13\lib\Stanford.NLP.Parser.Fsharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
