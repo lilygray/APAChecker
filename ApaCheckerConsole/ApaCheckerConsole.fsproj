@@ -156,6 +156,9 @@
     <Reference Include="Stanford.NLP.Parser.Fsharp">
       <HintPath>..\packages\Stanford.NLP.Parser.Fsharp.0.0.13\lib\Stanford.NLP.Parser.Fsharp.dll</HintPath>
     </Reference>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\packages\HtmlAgilityPack.1.5.1\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />

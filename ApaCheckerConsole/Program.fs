@@ -9,6 +9,7 @@ open System.Xml
 open System.Xml.Linq
 open System.Xml.XPath
 open Stanford.NLP.FSharp
+open HtmlAgilityPack
 
 [<EntryPoint>]
 
@@ -77,6 +78,9 @@ let main argv =
    
     let xn s = XName.Get(s, "http://www.tei-c.org/ns/1.0")
     let doc = XDocument.Load("text.xml")
+
+    for node in doc.SelectNodes() do
+        printfn "hi"
 
     //let abstractElement = doc.XPathSelectElement("/TEI")
     let abstractElement = doc.Element(xn "TEI").Element(xn "teiHeader").Element(xn "profileDesc").Element(xn "abstract").Element(xn "p").Value
