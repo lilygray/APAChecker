@@ -8,8 +8,8 @@ open System.Xml.Serialization
 open System.Xml
 open System.Xml.Linq
 open System.Xml.XPath
-open Stanford.NLP.FSharp
-open HtmlAgilityPack
+//open Stanford.NLP.FSharp
+//open HtmlAgilityPack
 
 [<EntryPoint>]
 
@@ -75,16 +75,33 @@ let main argv =
 
     //System.IO.File.WriteAllText("text.xml", xml)
     //printfn "%A" argv
-   
-    let xn s = XName.Get(s, "http://www.tei-c.org/ns/1.0")
-    let doc = XDocument.Load("text.xml")
 
-    for node in doc.SelectNodes() do
-        printfn "hi"
+    //let xn s = XName.Get(s, "http://www.tei-c.org/ns/1.0")
+    //let doc = XDocument.Load("text.xml")
 
-    //let abstractElement = doc.XPathSelectElement("/TEI")
-    let abstractElement = doc.Element(xn "TEI").Element(xn "teiHeader").Element(xn "profileDesc").Element(xn "abstract").Element(xn "p").Value
-    let titleElement = doc.Element(xn "TEI").Element(xn "teiHeader").Element(xn "fileDesc").Element(xn "titleStmt").Element(xn "title").Value
+    let doc = new XmlDocument()
+
+    //dial the area code
+    let nsmgr = new XmlNamespaceManager(doc.NameTable)
+    nsmgr.AddNamespace("TEI", "http://www.tei-c.org/ns/1.0")
+
+    doc.Load("text.xml")
+    let xmlNode = doc.DocumentElement :> XmlNode
+
+    let getElement elementName =
+        xmlNode.SelectSingleNode("//TEI:" + elementName, nsmgr).InnerText
+
+    let getElements elementName =
+        seq{
+            let nodes = xmlNode.SelectNodes("//TEI:" + elementName, nsmgr)
+            for node in nodes do
+                yield node
+            }
+         |> Seq.map(fun n -> n.InnerText)
+
+    let abstractElement = getElement "abstract"
+    let titleElement = getElement "title"
+
     let absWords = 
         abstractElement.Split([|' '|]) 
         |> Array.map (fun s -> s.Trim())
@@ -94,16 +111,12 @@ let main argv =
     if (150 < absWords.Length && absWords.Length < 250) then printfn "Most journals have a word limit between 150 and 250. Your abstract may be too long at %i words. Check with your particular journal." absWords.Length
     if abstractElement.Contains(titleElement) then printfn "You have a limited number of words. Don't waste them by repeating your title!"
 
-    //printfn "%s" "hi" //(par.Attribute(XName.Get "p").Value)
+    let paragraphs = getElements "p"
 
-    for div in doc.Element(xn "TEI").Element(xn "text").Element(xn "body").Elements(xn "div") do
-        for parg in div.Elements(xn "p") do
-            printfn "%s" (parg.Value)
+    let references = getElements "ref"
+    //let referenceCheck1 = references |> Seq.exists(lambda)
 
-    for div in doc.Element(xn "TEI").Element(xn "text").Element(xn "body").Elements(xn "div") do
-        for parg in div.Elements(xn "p") do
-            for rf in parg.Elements(xn "ref") do
-               // if rf.Attribute(xn "type").Value = "bibr" then //no errors? but it's throwing a NullReferenceException
-                if (rf.Value.Contains("and") || rf.Value.Contains("&")) then printfn "%s" (rf.Value)
+    //if rf.Attribute(xn "type").Value = "bibr" then //no errors? but it's throwing a NullReferenceException
+    //    if (rf.Value.Contains("and") || rf.Value.Contains("&")) then printfn "%s" (rf.Value)
 
     0 // return an integer exit codeFSharp.Data
