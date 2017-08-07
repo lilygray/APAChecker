@@ -114,9 +114,9 @@ let main argv =
     let paragraphs = getElements "p"
 
     let references = getElements "ref"
-    //let referenceCheck1 = references |> Seq.exists(lambda)
+    let referenceCheck1 = references |> Seq.filter(fun ref -> ref.Contains("and")) // && ref.GetType = "bibr")
 
     //if rf.Attribute(xn "type").Value = "bibr" then //no errors? but it's throwing a NullReferenceException
     //    if (rf.Value.Contains("and") || rf.Value.Contains("&")) then printfn "%s" (rf.Value)
 
-    0 // return an integer exit codeFSharp.Data
+    0 // return an integer exit code
