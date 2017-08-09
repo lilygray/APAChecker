@@ -102,36 +102,36 @@ let main argv =
             }
          |> Seq.map(fun n -> n.InnerText)
     
-    //function that will use regex to identify numbers in English
-    let regexEnglishNumbers input =
-        let numberRegex = new Regex(@"\b(zero|four|eight|(?:fiv|(?:ni|o)n)e|t(?:wo|hree)|s(?:ix|even)|twelve|(?:(?:elev|t)e|(?:fif|eigh|nine|(?:thi|fou)r|s(?:ix|even))tee)n|(?:fif|six|eigh|nine|(?:tw|sev)en|(?:thi|fo)r)ty|hundred|thousand|million|billion|trillion)\b")
-        //(from http://www.rexegg.com/regex-trick-numbers-in-english.html)
-        //return a list of numbers
-        //MAKE A LIST TO APPEND WORDS TO, SPLIT INPUT INTO WORDS, ADD WORDS TO LIST IF THEY MATCH
-        seq numWords
-        for word in n
-        if numberRegex.IsMatch(word) then
-            numberRegex.append(word)
+    //function that will split an input paragraph into words
+    let splitIntoWords (inputParg : string) =
+        inputParg.Split([|' '|]) 
+        |> Array.map (fun s -> s.Trim())
 
+    //function that will use regex to identify numbers in English
+    let regexEnglishNumbers (input : string) =
+        let numberRegex = new Regex(@"\b(zero|four|eight|(?:fiv|(?:ni|o)n)e|t(?:wo|hree)|s(?:ix|even)|twelve|(?:(?:elev|t)e|(?:fif|eigh|nine|(?:thi|fou)r|s(?:ix|even))tee)n|(?:fif|six|eigh|nine|(?:tw|sev)en|(?:thi|fo)r)ty|hundred|thousand|million|billion|trillion)\b")
+        //(regex taken from http://www.rexegg.com/regex-trick-numbers-in-english.html)
+        //split input paragraph into words and return a list of number words
+        let pargWords = splitIntoWords input
+        seq {for word in pargWords do if numberRegex.IsMatch(word) then yield word}
+    
     //function that will get and run tests on the abstract
     let abstractTests =
         let abstractElement = getElement "abstract"
 
         //split the abstract chunk into separate words
-        let absWords = 
-            abstractElement.Split([|' '|]) 
-            |> Array.map (fun s -> s.Trim())
+        let absWords = splitIntoWords abstractElement
 
         //test to see if the abstract is the right length
-        let absWordLength = absWords.Length
         if absWords.Length > 250 then printfn "Most journals have a word limit between 150 and 250. Your abstract is too long at %i words.\n" absWords.Length
         if (150 < absWords.Length && absWords.Length < 250) then printfn "Most journals have a word limit between 150 and 250. Your abstract may be too long at %i words. Check with your particular journal.\n" absWords.Length
 
+        //test to see if the abstract contains the title
         let titleElement = getElement "title"
         if abstractElement.Contains(titleElement) then printfn "You have a limited number of words. Don't waste them by repeating your title!\n"
 
         //if abstract contains a number it should be a numeral not a word
-        let absNumList = regexEnglishNumbers absWords
+        let absNumList = regexEnglishNumbers abstractElement
         for word in absNumList do
             printfn "Numbers in abstracts should be expressed as numerals. Please check the following word: %s\n" word
 
