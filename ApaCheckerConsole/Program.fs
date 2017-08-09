@@ -137,6 +137,12 @@ let main argv =
 
     let paragraphs = getElements "p"
 
+    let testNumberText = "one two Three four five Twelve 12cm wide the 15th trial the remaining 10% 13 lists 25 years old 105 stimulus words 10th-grade students
+    Forty-eight percent of the sample showed an increase; 2% showed no change. Twelve students improved, and 12 students did not improve."
+    let x = regexEnglishNumbers testNumberText
+    for word in x do
+        printfn "Change %s\n" word
+
     //function to get and run tests on the references
     let refTests =
         let references = getElements "ref"
