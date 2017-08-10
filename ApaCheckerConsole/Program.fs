@@ -108,12 +108,11 @@ let main argv =
         |> Array.map (fun s -> s.Trim())
 
     //function that will use regex to identify numbers in English
-    let regexEnglishNumbers (input : string) =
-        let numberRegex = new Regex(@"\b(zero|four|eight|(?:fiv|(?:ni|o)n)e|t(?:wo|hree)|s(?:ix|even)|twelve|(?:(?:elev|t)e|(?:fif|eigh|nine|(?:thi|fou)r|s(?:ix|even))tee)n|(?:fif|six|eigh|nine|(?:tw|sev)en|(?:thi|fo)r)ty|hundred|thousand|million|billion|trillion)\b")
+    let regexMatches (input : string) (regex : Regex) =
         //(regex taken from http://www.rexegg.com/regex-trick-numbers-in-english.html)
         //split input paragraph into words and return a list of number words
         let pargWords = splitIntoWords input
-        seq {for word in pargWords do if numberRegex.IsMatch(word) then yield word}
+        seq {for word in pargWords do if regex.IsMatch(word) then yield word}
     
     //function that will get and run tests on the abstract
     let abstractTests =
@@ -131,15 +130,32 @@ let main argv =
         if abstractElement.Contains(titleElement) then printfn "You have a limited number of words. Don't waste them by repeating your title!\n"
 
         //if abstract contains a number it should be a numeral not a word
-        let absNumList = regexEnglishNumbers abstractElement
+        let numberRegex = new Regex(@"\b(zero|four|eight|(?:fiv|(?:ni|o)n)e|t(?:wo|hree)|s(?:ix|even)|twelve|(?:(?:elev|t)e|(?:fif|eigh|nine|(?:thi|fou)r|s(?:ix|even))tee)n|(?:fif|six|eigh|nine|(?:tw|sev)en|(?:thi|fo)r)ty|hundred|thousand|million|billion|trillion)\b")
+        let absNumList = regexMatches abstractElement numberRegex
         for word in absNumList do
             printfn "Numbers in abstracts should be expressed as numerals. Please check the following word: %s\n" word
 
-    let paragraphs = getElements "p"
+    let pargTests =
+        let paragraphs = getElements "p" //seq [ "Twenty-seven percent";"12 percent" ]
+
+        //find any instances of the word "percent"
+        let percentRegex = new Regex(@"\b(percent)\b")
+        let numStartRegex = new Regex(@"\. \d")
+        for parg in paragraphs do
+            let percInstances = regexMatches parg percentRegex
+            for perc in percInstances do
+                printfn "The word \"percent\" should be expressed with the symbol %%. Please check the following word: %s\n" perc
+
+        //trying to print just the numeral that started a sentence, but having trouble with it for now. string -> MatchCollection not an easy type to work with.
+        //let test = "1 chicken. 2 dogs. 3 cats."
+        //let numStarts = seq {if numStartRegex.IsMatch(test) then yield numStartRegex.Matches}
+        //for num in numStarts do
+        //    printfn "Sentences should not be started with numerals. Please change the following numerals to spelled-out words: %s\n" (num.ToString())
 
     let testNumberText = "one two Three four five Twelve 12cm wide the 15th trial the remaining 10% 13 lists 25 years old 105 stimulus words 10th-grade students
     Forty-eight percent of the sample showed an increase; 2% showed no change. Twelve students improved, and 12 students did not improve."
-    let x = regexEnglishNumbers testNumberText
+    let numberRegex = new Regex(@"\b(zero|four|eight|(?:fiv|(?:ni|o)n)e|t(?:wo|hree)|s(?:ix|even)|twelve|(?:(?:elev|t)e|(?:fif|eigh|nine|(?:thi|fou)r|s(?:ix|even))tee)n|(?:fif|six|eigh|nine|(?:tw|sev)en|(?:thi|fo)r)ty|hundred|thousand|million|billion|trillion)\b")
+    let x = regexMatches testNumberText numberRegex
     for word in x do
         printfn "Change %s\n" word
 
@@ -157,6 +173,7 @@ let main argv =
     //biblstruct children "title"
 
     abstractTests
+    pargTests
     refTests
 
     0 // return an integer exit code
