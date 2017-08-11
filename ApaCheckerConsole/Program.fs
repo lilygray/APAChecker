@@ -136,22 +136,35 @@ let main argv =
             printfn "Numbers in abstracts should be expressed as numerals. Please check the following word: %s\n" word
 
     let pargTests =
-        let paragraphs = getElements "p" //seq [ "Twenty-seven percent";"12 percent" ]
+        let paragraphList = seq [ "Twenty-seven percent";"12 percent";"1589 chickens. 24365746774687 dogs. 300 cats. 1 chameleon. 000 mice.";
+        "Sentence. lowercase sentence. This is a sentence with words. Here's another one. but this is bad. aNDthIs is even worse."] //getElements "p"
+        let paragraphs =
+            paragraphList |> String.concat " "
 
         //find any instances of the word "percent"
         let percentRegex = new Regex(@"\b(percent)\b")
-        let numStartRegex = new Regex(@"\. \d")
-        for parg in paragraphs do
-            let percInstances = regexMatches parg percentRegex
-            for perc in percInstances do
-                printfn "The word \"percent\" should be expressed with the symbol %%. Please check the following word: %s\n" perc
+        let percInstances = regexMatches paragraphs percentRegex
+        for perc in percInstances do
+            printfn "The word \"percent\" should be expressed with the symbol %%. Please check the following word: %s\n" perc
 
-        //trying to print just the numeral that started a sentence, but having trouble with it for now. string -> MatchCollection not an easy type to work with.
-        //let test = "1 chicken. 2 dogs. 3 cats."
-        //let numStarts = seq {if numStartRegex.IsMatch(test) then yield numStartRegex.Matches}
-        //for num in numStarts do
-        //    printfn "Sentences should not be started with numerals. Please change the following numerals to spelled-out words: %s\n" (num.ToString())
+        //find any sentences starting with numerals
+        let numStartRegex = new Regex(@"\.\s+\d+\b")
+        let numStarts = numStartRegex.Matches(paragraphs)
+        if numStarts.Count <> 0 then printfn "Sentences should not be started with numerals. Please change the following numerals to spelled-out words:"
+        for num in numStarts do
+            printfn "%s" (num.ToString())
+        printfn "\n"
 
+        //test for capitalization of first word
+        let lowerStartRegex = new Regex(@"\.\s+[a-z]\w+\b")
+        let lowerStarts = lowerStartRegex.Matches(paragraphs)
+        if lowerStarts.Count <> 0 then printfn "Sentences should start with uppercase letters. Please capitalize the following words:"
+        for low in lowerStarts do
+            printfn "%s"(low.ToString())
+        printfn "\n"
+
+    //find any lowercase numbers spelled out (currently structured as a test, can be implemented for whatever purposes necessary)
+    //does not identify uppercase number words, but that's okay because you're not supposed to start a sentence with a numeral
     let testNumberText = "one two Three four five Twelve 12cm wide the 15th trial the remaining 10% 13 lists 25 years old 105 stimulus words 10th-grade students
     Forty-eight percent of the sample showed an increase; 2% showed no change. Twelve students improved, and 12 students did not improve."
     let numberRegex = new Regex(@"\b(zero|four|eight|(?:fiv|(?:ni|o)n)e|t(?:wo|hree)|s(?:ix|even)|twelve|(?:(?:elev|t)e|(?:fif|eigh|nine|(?:thi|fou)r|s(?:ix|even))tee)n|(?:fif|six|eigh|nine|(?:tw|sev)en|(?:thi|fo)r)ty|hundred|thousand|million|billion|trillion)\b")
